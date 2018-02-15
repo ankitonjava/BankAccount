@@ -37,6 +37,10 @@ public class EndToEndTestCase
 
     private Printer printer = new PrinterImpl();
 
+    /**
+     * Create beneficiary and their respective accounts.
+     * Link account with beneficiary.
+     */
     @BeforeClass
     public static void oneTimeSetupAndConfiguration()
     {
@@ -109,6 +113,12 @@ public class EndToEndTestCase
 
     }
 
+    /**
+     * Negative test. Try to retrieve account based on invalid account id.
+     * Try to access account not associate with beneficiary.
+     *
+     * @throws AccountingOperationException
+     */
     @Test(expected = AccountingOperationException.class)
     public void verifyValidationForInvalidAccountId() throws AccountingOperationException
     {
@@ -184,6 +194,16 @@ public class EndToEndTestCase
 
     }
 
+    /**
+     * Verify Statement printing.
+     * Test case will gather initial counter for print function (function used to print statement).
+     * Perform some operation on account (DEPOSIT or WITHDRAW) , then, execute print statement.
+     * Test case verifies number of records getting printed using counter on printer services.
+     *
+     * @throws AccountingOperationException
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     */
     @Test
     public void verifyFullStatement() throws AccountingOperationException, NoSuchFieldException, IllegalAccessException
     {
