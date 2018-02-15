@@ -6,19 +6,35 @@ import java.util.List;
 
 import in.services.accounting.personalbanking.exceptions.AccountingOperationException;
 
+/**
+ * This class represents end-customer.
+ */
 public final class Beneficiary
 {
     private final String beneficiaryId;
 
     private final String beneficiaryName;
 
+    // one beneficiary can have more than one account associated with them.
     private final List<Account> accounts;
 
+    /**
+     * Returns list of all account associated with beneficiary.
+     *
+     * @return
+     */
     public List<Account> getAccounts()
     {
         return Collections.unmodifiableList(accounts);
     }
 
+    /**
+     * Returns account based on account id (passed in argument).
+     *
+     * @param pAccountId
+     * @return
+     * @throws AccountingOperationException
+     */
     public Account getAccountById(String pAccountId) throws AccountingOperationException
     {
         for (Account account : accounts)
@@ -48,11 +64,21 @@ public final class Beneficiary
         return new BeneficiaryBuilder();
     }
 
+    /**
+     * Return beneficiary id
+     *
+     * @return
+     */
     public String getBeneficiaryId()
     {
         return beneficiaryId;
     }
 
+    /**
+     * Returns beneficiary name.
+     *
+     * @return
+     */
     public String getBeneficiaryName()
     {
         return beneficiaryName;

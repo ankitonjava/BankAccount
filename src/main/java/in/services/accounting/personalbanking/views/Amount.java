@@ -6,6 +6,8 @@ import in.services.accounting.personalbanking.exceptions.AccountingOperationExce
 
 /**
  * Amount described in terms of value and unit of measurement.
+ * Default unit of measurement is inr and default amount value will be set to zero.
+ *
  */
 public final class Amount
 {

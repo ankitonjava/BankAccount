@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public interface Printer
 {
     /**
-     * Counter for verification purpose. Counter will return number of times function i
+     * Counter for verification purpose. Counter will return number of times print function is called.
      *
      * @return
      */

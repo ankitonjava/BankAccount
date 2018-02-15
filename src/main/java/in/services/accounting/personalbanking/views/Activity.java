@@ -2,16 +2,28 @@ package in.services.accounting.personalbanking.views;
 
 import java.util.Date;
 
+/**
+ * Activity class is used for statement printing.
+ */
 public final class Activity
 {
+    // Transaction date
     private final Date transactionDate;
 
+    // Accounting operation (DEPOSIT,WITHDRAW)
     private final AccountingOperationType accountingOperationType;
 
+    // Transaction amount
     private final Amount transactionAmount;
 
+    // Balance Amount
     private final Amount balanceAmount;
 
+    /**
+     * Function used to construct Activity object
+     *
+     * @return
+     */
     public static ActivityBuilder newBuilder()
     {
         return new ActivityBuilder();
@@ -25,21 +37,41 @@ public final class Activity
         this.transactionAmount = pActivityBuilder.transactionAmount;
     }
 
+    /**
+     * Function will return transaction date.
+     *
+     * @return
+     */
     public Date getTransactionDate()
     {
         return transactionDate;
     }
 
+    /**
+     * Function will return transaction type
+     *
+     * @return
+     */
     public AccountingOperationType getAccountingOperationType()
     {
         return accountingOperationType;
     }
 
+    /**
+     * Function will return transaction amount
+     *
+     * @return
+     */
     public Amount getTransactionAmount()
     {
         return transactionAmount;
     }
 
+    /**
+     * Function will return balance amount.
+     *
+     * @return
+     */
     public Amount getBalanceAmount()
     {
         return balanceAmount;
