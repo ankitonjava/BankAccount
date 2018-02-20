@@ -1,6 +1,7 @@
 package in.services.accounting.personalbanking.views;
 
-import java.util.Date;
+import java.time.Instant;
+import java.util.Objects;
 
 /**
  * Activity class is used for statement printing.
@@ -8,7 +9,7 @@ import java.util.Date;
 public final class Activity
 {
     // Transaction date
-    private final Date transactionDate;
+    private final Instant transactionDate;
 
     // Accounting operation (DEPOSIT,WITHDRAW)
     private final AccountingOperationType accountingOperationType;
@@ -42,7 +43,7 @@ public final class Activity
      *
      * @return
      */
-    public Date getTransactionDate()
+    public Instant getTransactionDate()
     {
         return transactionDate;
     }
@@ -88,29 +89,22 @@ public final class Activity
         {
             return false;
         }
-
         Activity activity = (Activity) o;
-
-        if (!transactionDate.equals(activity.transactionDate))
-        {
-            return false;
-        }
-        return accountingOperationType == activity.accountingOperationType;
+        return Objects.equals(transactionDate, activity.transactionDate) &&
+                accountingOperationType == activity.accountingOperationType;
     }
 
     @Override
     public int hashCode()
     {
-        int result = transactionDate.hashCode();
-        result = 31 * result + accountingOperationType.hashCode();
-        return result;
+        return Objects.hash(transactionDate, accountingOperationType);
     }
 
     public static class ActivityBuilder
     {
         public ActivityBuilder()
         {
-            this.date = new Date();
+            this.date = Instant.now();
         }
 
         public ActivityBuilder setAccountingOperationType(AccountingOperationType accountingOperationType)
@@ -136,7 +130,7 @@ public final class Activity
             return new Activity(this);
         }
 
-        private Date date;
+        private final Instant date;
 
         private AccountingOperationType accountingOperationType;
 

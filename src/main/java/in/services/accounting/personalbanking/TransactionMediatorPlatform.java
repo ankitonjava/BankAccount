@@ -7,7 +7,7 @@ import in.services.accounting.personalbanking.views.Beneficiary;
 
 public class TransactionMediatorPlatform
 {
-    private static TransactionMediatorPlatform transactionMediatorPlatform = new TransactionMediatorPlatform();
+    private static final TransactionMediatorPlatform transactionMediatorPlatform = new TransactionMediatorPlatform();
 
     private TransactionMediatorPlatform()
     {

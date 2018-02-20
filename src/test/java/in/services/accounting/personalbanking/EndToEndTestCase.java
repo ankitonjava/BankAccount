@@ -1,13 +1,12 @@
 
 package in.services.accounting.personalbanking;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import in.services.accounting.personalbanking.exceptions.AccountingOperationException;
@@ -31,9 +30,9 @@ import in.services.accounting.personalbanking.views.Beneficiary;
 public class EndToEndTestCase
 {
 
-    private static Beneficiary ankit;
+    private Beneficiary ankit;
 
-    private static Beneficiary john;
+    private Beneficiary john;
 
     private Printer printer = new PrinterImpl();
 
@@ -41,8 +40,8 @@ public class EndToEndTestCase
      * Create beneficiary and their respective accounts.
      * Link account with beneficiary.
      */
-    @BeforeClass
-    public static void oneTimeSetupAndConfiguration()
+    @Before
+    public void setUp()
     {
 
         ankit = getBeneficiary("1", "Ankit");
@@ -67,26 +66,6 @@ public class EndToEndTestCase
     }
 
     /**
-     * After every test case, reset net amount to zero, so that testcases can be executed in-parallel in any order.
-     *
-     * @throws AccountingOperationException
-     */
-    @Before
-    public void setUp() throws AccountingOperationException, NoSuchFieldException, IllegalAccessException
-    {
-        Account ankitAccount = ankit.getAccountById("ankitAccountId");
-        Amount netAmount = ankitAccount.getNetAmount();
-        if (netAmount.getValue().doubleValue() > 0)
-        {
-            ankitAccount.withDrawAmount(netAmount);
-            Field f = ankitAccount.getClass().getDeclaredField("activities");
-            f.setAccessible(true);
-            List<Activity> list = (List) f.get(ankitAccount);
-            list.clear();
-        }
-    }
-
-    /**
      * Verify Transaction between two beneficiaries.
      *
      * @throws AccountingOperationException
@@ -101,15 +80,15 @@ public class EndToEndTestCase
         ankitAccount.depositAmount(Amount.newBuilder().setValue(new BigDecimal(200)).build());
 
         //Total amount in Ankit should be 300
-        org.junit.Assert.assertTrue("Net amount should be 300 inr.", ankitAccount.getNetAmount().equals(getAmountOfValue(300)));
+        org.junit.Assert.assertThat(ankitAccount.getNetAmount(), org.hamcrest.core.Is.is(getAmountOfValue(300)));
 
         Amount transactionAmount = Amount.newBuilder().setValue(new BigDecimal(100)).build();
 
         // Transfer amount from Ankit [accountId = ankitAccountId] to John [accountId = johnAccountId]
         TransactionMediatorPlatform.getInstance().transferAmount(ankit, john, "ankitAccountId", "johnAccountId", transactionAmount);
 
-        org.junit.Assert.assertTrue("Expected 200 left in ankit's account after transaction", ankitAccount.getNetAmount().equals(getAmountOfValue(200)));
-        org.junit.Assert.assertTrue("Expected 100 in John's account after transaction", john.getAccountById("johnAccountId").getNetAmount().equals(getAmountOfValue(100)));
+        org.junit.Assert.assertThat(ankitAccount.getNetAmount(), org.hamcrest.core.Is.is(getAmountOfValue(200)));
+        org.junit.Assert.assertThat(john.getAccountById("johnAccountId").getNetAmount(), org.hamcrest.core.Is.is(getAmountOfValue(100)));
 
     }
 
@@ -161,7 +140,7 @@ public class EndToEndTestCase
         ankitAccount.withDrawAmount(getAmountOfValue(50));
 
         //Total amount in Ankit should be 100 - 50 = 50
-        org.junit.Assert.assertTrue("Net amount should be 50 inr.", ankitAccount.getNetAmount().equals(getAmountOfValue(50)));
+        org.junit.Assert.assertThat("Net amount should be 50 inr.", ankitAccount.getNetAmount(), org.hamcrest.core.Is.is(getAmountOfValue(50)));
     }
 
     /**
@@ -171,26 +150,22 @@ public class EndToEndTestCase
      * c) Verify transaction type as Deposit , transaction amount , transaction date and net balance amount in statement.
      *
      * @throws AccountingOperationException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
      */
     @Test
-    public void verifyStatementListIsGettingPopulated() throws AccountingOperationException, NoSuchFieldException, IllegalAccessException
+    public void verifyStatementListIsGettingPopulated() throws AccountingOperationException
     {
         Account ankitAccount = ankit.getAccountById("ankitAccountId");
 
-        Date currentDate = new Date();
+        Instant currentDateTime = Instant.now();
         // Ankit deposit 100 inr to his account id ("ankitAccountId")
         ankitAccount.depositAmount(getAmountOfValue(100));
 
-        Field f = ankitAccount.getClass().getDeclaredField("activities");
-        f.setAccessible(true);
-        List<Activity> list = (List<Activity>) f.get(ankitAccount);
-        org.junit.Assert.assertTrue("Statement list should have only one record.", list.size() == 1);
+        List<Activity> list = ankitAccount.getActivities();
+        org.junit.Assert.assertThat(1, org.hamcrest.core.Is.is(list.size()));
         org.junit.Assert.assertEquals(AccountingOperationType.DEPOSIT, list.get(0).getAccountingOperationType());
         org.junit.Assert.assertEquals(getAmountOfValue(100), list.get(0).getTransactionAmount());
         org.junit.Assert.assertEquals(getAmountOfValue(100), list.get(0).getBalanceAmount());
-        org.junit.Assert.assertTrue(list.get(0).getTransactionDate().after(currentDate) || list.get(0).getTransactionDate().equals(currentDate));
+        org.junit.Assert.assertThat(true, org.hamcrest.core.Is.is(list.get(0).getTransactionDate().isAfter(currentDateTime) || list.get(0).getTransactionDate().equals(currentDateTime)));
 
     }
 
@@ -222,16 +197,14 @@ public class EndToEndTestCase
      * Verify filtering of account statement based on transaction type.
      *
      * @throws AccountingOperationException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
      */
     @Test
-    public void verifyFilteringOfStatement() throws AccountingOperationException, NoSuchFieldException, IllegalAccessException
+    public void verifyFilteringOfStatement() throws AccountingOperationException
     {
         Account ankitAccount = ankit.getAccountById("ankitAccountId");
 
-        Date today = new Date();
-        Date tomorrow = new Date(today.getTime() + (1000 * 60 * 60 * 24));
+        Instant today = Instant.now();
+        Instant tomorrow = Instant.now().plus(1, ChronoUnit.DAYS);
         ankitAccount.depositAmount(getAmountOfValue(100));
         ankitAccount.depositAmount(getAmountOfValue(50));
         ankitAccount.depositAmount(getAmountOfValue(20));
@@ -242,13 +215,14 @@ public class EndToEndTestCase
         ankitAccount.printFilteredStatement(printer, AccountingOperationType.DEPOSIT, today, tomorrow);
 
         // print counter should return 3 as there were 3 deposits.
-        org.junit.Assert.assertEquals(3, printer.getCounter().get() - initialCounterValue);
+        org.junit.Assert.assertThat(3L, org.hamcrest.core.Is.is(printer.getCounter().get() - initialCounterValue));
 
         initialCounterValue = printer.getCounter().get();
         ankitAccount.printFilteredStatement(printer, AccountingOperationType.WITHDRAW, today, tomorrow);
 
         //print counter should return 1 as there were only 1 withdraw.
-        org.junit.Assert.assertEquals(1, printer.getCounter().get() - initialCounterValue);
+        org.junit.Assert.assertThat(1L, org.hamcrest.core.Is.is(printer.getCounter().get() - initialCounterValue));
+
     }
 
 }

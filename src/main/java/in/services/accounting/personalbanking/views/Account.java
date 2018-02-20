@@ -1,8 +1,10 @@
 package in.services.accounting.personalbanking.views;
 
-import java.util.Date;
+import java.time.Instant;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import in.services.accounting.personalbanking.exceptions.AccountingOperationException;
 import in.services.accounting.personalbanking.in.services.accounting.personalbanking.externalinterfaces.Printer;
@@ -25,7 +27,12 @@ public class Account
         return netAmount;
     }
 
-    private Amount netAmount;
+    private final Amount netAmount;
+
+    public List<Activity> getActivities()
+    {
+        return Collections.unmodifiableList(activities);
+    }
 
     // Used for maitaining activities (account statement)
     private final List<Activity> activities;
@@ -33,7 +40,7 @@ public class Account
     public Account(String accountId)
     {
         this.accountId = accountId;
-        activities = new LinkedList<Activity>();
+        activities = new LinkedList<>();
         netAmount = Amount.newBuilder().build();
     }
 
@@ -45,14 +52,14 @@ public class Account
      */
     public synchronized void depositAmount(Amount pAmount) throws AccountingOperationException
     {
-        netAmount = netAmount.addAmount(pAmount);
+        netAmount.addAmount(pAmount);
         activities.add(Activity.newBuilder().setAccountingOperationType(AccountingOperationType.DEPOSIT).setTransactionAmount(pAmount).setBalanceAmount(netAmount).build());
     }
 
     public synchronized void withDrawAmount(Amount pAmount) throws AccountingOperationException
     {
 
-        netAmount = netAmount.subtractAmount(pAmount);
+        netAmount.subtractAmount(pAmount);
         activities.add(Activity.newBuilder().setAccountingOperationType(AccountingOperationType.WITHDRAW).setTransactionAmount(pAmount).setBalanceAmount(netAmount).build());
 
     }
@@ -89,7 +96,7 @@ public class Account
      * @param startDate
      * @param endDate
      */
-    public void printFilteredStatement(Printer printer, AccountingOperationType accountingOperationType, Date startDate, Date endDate)
+    public void printFilteredStatement(Printer printer, AccountingOperationType accountingOperationType, Instant startDate, Instant endDate)
     {
         if (printer != null)
         {
@@ -98,12 +105,11 @@ public class Account
             for (Activity activity : activities)
             {
                 if (
-                        (AccountingOperationType.BOTH.equals(accountingOperationType) || activity.getAccountingOperationType().equals(accountingOperationType))
+                        (AccountingOperationType.BOTH == (accountingOperationType) || activity.getAccountingOperationType() == (accountingOperationType))
                                 &&
-                                (activity.getTransactionDate().equals(startDate) || activity.getTransactionDate().after(startDate))
+                                (activity.getTransactionDate().toEpochMilli() >= startDate.toEpochMilli())
                                 &&
-                                (activity.getTransactionDate().equals(endDate) || activity.getTransactionDate().before(endDate))
-
+                                activity.getTransactionDate().isBefore(endDate)
                         )
                 {
                     stringBuilder = new StringBuilder();
@@ -114,6 +120,11 @@ public class Account
             }
         }
 
+    }
+
+    public String getAccountId()
+    {
+        return accountId;
     }
 
     @Override
@@ -127,20 +138,15 @@ public class Account
         {
             return false;
         }
-
         Account account = (Account) o;
-
-        return accountId != null ? accountId.equals(account.accountId) : account.accountId == null;
+        return Objects.equals(accountId, account.accountId) &&
+                Objects.equals(netAmount, account.netAmount) &&
+                Objects.equals(activities, account.activities);
     }
 
     @Override
     public int hashCode()
     {
-        return accountId != null ? accountId.hashCode() : 0;
-    }
-
-    public String getAccountId()
-    {
-        return accountId;
+        return Objects.hash(accountId, netAmount, activities);
     }
 }

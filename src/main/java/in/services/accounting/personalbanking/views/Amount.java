@@ -1,6 +1,7 @@
 package in.services.accounting.personalbanking.views;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import in.services.accounting.personalbanking.exceptions.AccountingOperationException;
 
@@ -15,7 +16,7 @@ public final class Amount
     private final String unitOfMeasurement;
 
     // Amount value
-    private final BigDecimal value;
+    private BigDecimal value;
 
     /**
      * Amount class Constructor
@@ -41,11 +42,11 @@ public final class Amount
      * @return
      * @throws AccountingOperationException
      */
-    public Amount addAmount(Amount pAmount) throws AccountingOperationException
+    public void addAmount(Amount pAmount) throws AccountingOperationException
     {
         if (this.unitOfMeasurement.equals(pAmount.getUnitOfMeasurement()))
         {
-            return new AmountBuilder().setUnitOfMeasurement(this.unitOfMeasurement).setValue(this.getValue().add(pAmount.getValue())).build();
+            this.value = this.value.add(pAmount.getValue());
         }
         else
         {
@@ -60,7 +61,7 @@ public final class Amount
      * @return
      * @throws AccountingOperationException
      */
-    public Amount subtractAmount(Amount pAmount) throws AccountingOperationException
+    public void subtractAmount(Amount pAmount) throws AccountingOperationException
     {
 
         if (this.getValue().doubleValue() <= 0)
@@ -70,7 +71,7 @@ public final class Amount
 
         if (this.unitOfMeasurement.equals(pAmount.getUnitOfMeasurement()))
         {
-            return new AmountBuilder().setUnitOfMeasurement(this.unitOfMeasurement).setValue(this.getValue().subtract(pAmount.getValue())).build();
+            this.value = this.value.subtract(pAmount.getValue());
         }
         else
         {
@@ -99,6 +100,15 @@ public final class Amount
     }
 
     @Override
+    public String toString()
+    {
+        return "Amount{" +
+                "unitOfMeasurement='" + unitOfMeasurement + '\'' +
+                ", value=" + value +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o)
     {
         if (this == o)
@@ -109,31 +119,15 @@ public final class Amount
         {
             return false;
         }
-
         Amount amount = (Amount) o;
-
-        if (unitOfMeasurement != null ? !unitOfMeasurement.equals(amount.unitOfMeasurement) : amount.unitOfMeasurement != null)
-        {
-            return false;
-        }
-        return value != null ? value.equals(amount.value) : amount.value == null;
+        return Objects.equals(unitOfMeasurement, amount.unitOfMeasurement) &&
+                Objects.equals(value, amount.value);
     }
 
     @Override
     public int hashCode()
     {
-        int result = unitOfMeasurement != null ? unitOfMeasurement.hashCode() : 0;
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Amount{" +
-                "unitOfMeasurement='" + unitOfMeasurement + '\'' +
-                ", value=" + value +
-                '}';
+        return Objects.hash(unitOfMeasurement, value);
     }
 
     public static class AmountBuilder

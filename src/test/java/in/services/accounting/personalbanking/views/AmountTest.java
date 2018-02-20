@@ -30,7 +30,7 @@ public class AmountTest
     {
         Amount firstAmount = Amount.newBuilder().setValue(new BigDecimal(200)).build();
         Amount secondAmount = Amount.newBuilder().setValue(new BigDecimal(100)).build();
-        secondAmount = secondAmount.addAmount(firstAmount);
+        secondAmount.addAmount(firstAmount);
         org.junit.Assert.assertNotNull(secondAmount);
         org.junit.Assert.assertEquals("Amount is not updated correctly.", new BigDecimal(300), secondAmount.getValue());
     }
@@ -45,7 +45,7 @@ public class AmountTest
     {
         Amount firstAmount = Amount.newBuilder().setValue(new BigDecimal(200)).build();
         Amount secondAmount = Amount.newBuilder().setValue(new BigDecimal(100)).build();
-        firstAmount = firstAmount.subtractAmount(secondAmount);
+        firstAmount.subtractAmount(secondAmount);
         org.junit.Assert.assertNotNull(firstAmount);
         org.junit.Assert.assertEquals("Amount is not updated correctly.", new BigDecimal(100), secondAmount.getValue());
     }

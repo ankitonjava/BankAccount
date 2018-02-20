@@ -9,8 +9,9 @@ import in.services.accounting.personalbanking.in.services.accounting.personalban
  */
 public class PrinterImpl implements Printer
 {
-    private AtomicLong counter = new AtomicLong(0);
+    private final AtomicLong counter = new AtomicLong(0);
 
+    @Override
     public AtomicLong getCounter()
     {
         return counter;
@@ -21,6 +22,7 @@ public class PrinterImpl implements Printer
      *
      * @param message
      */
+    @Override
     public void print(String message)
     {
         System.out.println(message);

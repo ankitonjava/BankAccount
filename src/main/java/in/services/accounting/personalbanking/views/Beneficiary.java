@@ -3,6 +3,7 @@ package in.services.accounting.personalbanking.views;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import in.services.accounting.personalbanking.exceptions.AccountingOperationException;
 
@@ -56,7 +57,7 @@ public final class Beneficiary
     {
         this.beneficiaryId = pBuilder.beneficiaryId;
         this.beneficiaryName = pBuilder.beneficiaryName;
-        this.accounts = new ArrayList<Account>();
+        this.accounts = new ArrayList<>();
     }
 
     public static BeneficiaryBuilder newBuilder()
@@ -95,22 +96,16 @@ public final class Beneficiary
         {
             return false;
         }
-
         Beneficiary that = (Beneficiary) o;
-
-        if (beneficiaryId != null ? !beneficiaryId.equals(that.beneficiaryId) : that.beneficiaryId != null)
-        {
-            return false;
-        }
-        return beneficiaryName != null ? beneficiaryName.equals(that.beneficiaryName) : that.beneficiaryName == null;
+        return Objects.equals(beneficiaryId, that.beneficiaryId) &&
+                Objects.equals(beneficiaryName, that.beneficiaryName) &&
+                Objects.equals(accounts, that.accounts);
     }
 
     @Override
     public int hashCode()
     {
-        int result = beneficiaryId != null ? beneficiaryId.hashCode() : 0;
-        result = 31 * result + (beneficiaryName != null ? beneficiaryName.hashCode() : 0);
-        return result;
+        return Objects.hash(beneficiaryId, beneficiaryName, accounts);
     }
 
     public static class BeneficiaryBuilder
